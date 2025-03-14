@@ -1,9 +1,55 @@
 import React, { useState } from 'react';
 import { Upload, Building2, Award } from 'lucide-react';
+import { useCallback } from 'react';
 
 export function DoctorRegistration() {
   const [step, setStep] = useState(1);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // 验证文件类型和大小
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert('只支持 JPG 和 PNG 格式的文件');
+        return;
+      }
+      
+      if (file.size > maxSize) {
+        alert('文件大小不能超过 5MB');
+        return;
+      }
+      
+      setCertificateFile(file);
+    }
+  }, []);
+
+  const [clinicFiles, setClinicFiles] = useState<File[]>([]);
+
+  const handleClinicFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxFiles = 5;
   
+      // 过滤无效文件
+      const validFiles = Array.from(files).filter(file => 
+        allowedTypes.includes(file.type) && 
+        file.size <= maxSize
+      ).slice(0, maxFiles);
+  
+      if (validFiles.length < files.length) {
+        alert('只支持 JPG、PNG 格式的文件，且每个文件大小不超过 5MB，最多上传 5 张');
+      }
+  
+      setClinicFiles(validFiles);
+    }
+  }, []);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h2 className="text-3xl font-bold text-gray-900 mb-8">医生入驻</h2>
@@ -85,15 +131,29 @@ export function DoctorRegistration() {
                 <label className="block text-sm font-medium text-gray-700 mb-4">
                   上传执业证书
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600">
-                    点击或拖拽文件上传
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    支持 JPG、PNG 格式，大小不超过 5MB
-                  </p>
-                </div>
+                <label htmlFor="certificate-upload" className="cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-600">
+                      点击或拖拽文件上传
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      支持 JPG、PNG 格式，大小不超过 5MB
+                    </p>
+                    {certificateFile && (
+                      <p className="mt-2 text-sm text-blue-600">
+                        已上传文件：{certificateFile.name}
+                      </p>
+                    )}
+                  </div>
+                </label>
+                <input
+                  id="certificate-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".jpg,.jpeg,.png"
+                  onChange={handleFileUpload}
+                />
               </div>
             </div>
           </div>
@@ -127,15 +187,44 @@ export function DoctorRegistration() {
                 <label className="block text-sm font-medium text-gray-700 mb-4">
                   诊所照片
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600">
-                    上传诊所内外环境照片
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    最多上传 5 张照片
-                  </p>
-                </div>
+                <label htmlFor="clinic-upload" className="cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-600">
+                      点击或拖拽文件上传
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      最多上传 5 张照片，支持 JPG、PNG 格式，大小不超过 5MB
+                    </p>
+                    {clinicFiles.length > 0 && (
+                      <div className="mt-4 grid grid-cols-3 gap-2">
+                        {clinicFiles.map((file, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`诊所照片 ${index + 1}`}
+                              className="w-full h-20 object-cover rounded-md"
+                            />
+                            <button
+                              onClick={() => setClinicFiles(clinicFiles.filter((_, i) => i !== index))}
+                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </label>
+                <input
+                  id="clinic-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".jpg,.jpeg,.png"
+                  multiple
+                  onChange={handleClinicFileUpload}
+                />
               </div>
             </div>
           </div>
