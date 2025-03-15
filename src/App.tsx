@@ -3,12 +3,18 @@ import { Navigation } from './components/Navigation';
 import { HeroSection } from './components/HeroSection';
 import { AppointmentSystem } from './components/AppointmentSystem';
 import { DoctorRegistration } from './components/DoctorRegistration';
+import { ChatDialog } from './components/ChatDialog';
 
 function App() {
   const [currentView, setCurrentView] = useState<'home' | 'appointment' | 'registration' | 'consultation' | 'profile'>('home');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleNavigate = (view: 'home' | 'appointment' | 'registration' | 'consultation' | 'profile') => {
-    setCurrentView(view);
+    if (view === 'consultation') {
+      setIsChatOpen(true);
+    } else {
+      setCurrentView(view);
+    }
   };
 
   return (
@@ -27,13 +33,13 @@ function App() {
                 <ServiceCard
                   title="在线问诊"
                   description="随时随地与专业兽医在线交流，获取专业建议"
-                  imageUrl="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80"
+                  imageUrl="https://images.unsplash.com/photo-1583336663277-620dc1996580?auto=format&fit=crop&q=80"
                   onClick={() => handleNavigate('consultation')}
                 />
                 <ServiceCard
                   title="预约就医"
                   description="便捷的线上预约系统，节省您的等待时间"
-                  imageUrl="https://images.unsplash.com/photo-1628009368231-7bb7cf0a6250?auto=format&fit=crop&q=80"
+                  imageUrl="https://images.unsplash.com/photo-1578496480157-697fc14d2e55?auto=format&fit=crop&q=80"
                   onClick={() => handleNavigate('appointment')}
                 />
                 <ServiceCard
@@ -50,6 +56,7 @@ function App() {
         {currentView === 'appointment' && <AppointmentSystem />}
         {currentView === 'registration' && <DoctorRegistration />}
       </main>
+      <ChatDialog isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 }
