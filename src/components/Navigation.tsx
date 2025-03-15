@@ -5,11 +5,21 @@ interface NavigationProps {
   onNavigate: (view: 'home' | 'appointment' | 'consultation' | 'profile' | 'registration') => void;
 }
 
+import { useCallback } from 'react';
+
 export function Navigation({ onNavigate }: NavigationProps) {
-  const handleClick = (view: Parameters<NavigationProps['onNavigate']>[0]) => {
-    console.log(`Navigating to: ${view}`); // 添加调试信息
-    onNavigate(view);
-  };
+  const handleClick = useCallback((view: Parameters<NavigationProps['onNavigate']>[0]) => {
+    try {
+      console.log(`Navigating to: ${view}`);
+      if (typeof onNavigate === 'function') {
+        onNavigate(view);
+      } else {
+        console.error('onNavigate is not a function');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  }, [onNavigate]);
 
   return (
     <nav className="bg-white shadow-lg">
@@ -41,8 +51,17 @@ export function Navigation({ onNavigate }: NavigationProps) {
 }
 
 function NavLink({ icon, text, onClick }: { icon: React.ReactNode; text: string; onClick: () => void }) {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClick();
+  };
+
   return (
-    <button onClick={onClick} className="flex items-center space-x-1 text-gray-700 hover:text-blue-600">
+    <button 
+      onClick={handleClick} 
+      className="flex items-center space-x-1 text-gray-700 hover:text-blue-600"
+    >
       {icon}
       <span>{text}</span>
     </button>

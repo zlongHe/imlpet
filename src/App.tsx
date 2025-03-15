@@ -10,9 +10,11 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleNavigate = (view: 'home' | 'appointment' | 'registration' | 'consultation' | 'profile') => {
+    console.log(`Handling navigation to: ${view}`);
     if (view === 'consultation') {
       setIsChatOpen(true);
     } else {
+      setIsChatOpen(false);
       setCurrentView(view);
     }
   };
